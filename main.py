@@ -1,6 +1,10 @@
 # Example file showing a basic pygame "game loop"
 import pygame
-print("Hello")
+
+def render():
+    screen.fill("blue")
+    # flip() the display to put your work on screen
+    pygame.display.flip()
 
 # pygame setup
 pygame.init()
@@ -16,12 +20,9 @@ while running:
             running = False
 
     # fill the screen with a color to wipe away anything from last frame
-    screen.fill("purple")
+    render()
 
-    # RENDER YOUR GAME HERE
 
-    # flip() the display to put your work on screen
-    pygame.display.flip()
 
     clock.tick(60)  # limits FPS to 60
 
