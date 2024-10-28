@@ -1,6 +1,6 @@
 # Example file showing a basic pygame "game loop"
 import pygame
-print("Hello")as
+print("Hello")
 
 # pygame setup
 pygame.init()
