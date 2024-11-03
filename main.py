@@ -87,7 +87,10 @@ scene = []
 def spawnDuckie():
     val = False
 
+    cout = 0
+
     while val == False:
+        cout += 1
         val = True
         temp = Object(duck.image, 0, 0, duck.width, duck.height, 10, "duck")
 
@@ -96,6 +99,9 @@ def spawnDuckie():
         for i in scene:
             if abs(temp.y - i.y) < duck.height:
                 val = False
+
+        # if cout >= 50:
+            # val = True
         
     #temp.y = randint(1, 500)
     #print(temp.y)
@@ -115,11 +121,11 @@ def checkMouse():
     #print(mousePos)
     for i in scene:
         if i.id == "duck":
-            if i.alive:
+            if i.state == 0:
                 if mousePos[0] > i.x and mousePos[0] < i.x + i.width:
                     if mousePos[1] > i.y and mousePos[1] < i.y + i.height:
                         i.changeState(1)
-                        #i.alive = False
+                        # i.alive = False
                         score += 1
                         patosm = patosm + 1
 conta = 0
@@ -133,14 +139,14 @@ def render(count):
         if i.state == 0:
             if i.conta < 50:
                 if patosm > 0:
-                    i.x += randint(50, 80)
-                    i.y += randint (20, 40)
+                    i.x += randint(20, 30)
+                    i.y += randint (10, 20)
                 i.x += 2
                 i.y += 1
             else:
                 if patosm > 0:
-                    i.x += randint(50, 80)
-                    i.y += randint (20, 40)
+                    i.x += randint(20, 30)
+                    i.y += randint (10, 20)
                 i.x += 2
                 i.y -= 1
             if i.conta == 100:
