@@ -22,6 +22,12 @@ running = True
 pygame.font.init() # you have to call this at the start, 
 my_font = pygame.font.SysFont('Comic Sans MS', 30)
 
+class Game:
+    def __init__(self):
+        self.state = 0
+        self.roundNum = 0
+        self.roundDiff = 1
+
 # Definir o jogo como uma classe
 class Round:
     def __init__(self):
@@ -32,7 +38,8 @@ class Round:
         self.curFrame = 0
     
     def roundStart(self, dif, ducknum):
-        self.maxFrame = 6000
+        self.curFrame = 0
+        self.maxFrame = 180
         self.state = 1
         self.dif = dif
         self.scene = []
@@ -43,7 +50,7 @@ class Round:
     
     def roundEnd(self):
         global score
-        self.maxFrame = 6000
+        self.maxFrame = 400
         val = True
         for i in self.scene:
             if i.state == 0:
@@ -116,6 +123,7 @@ class sprite:
 
         self.image.append(tempList)
 
+gm = Game()
 r1 = Round()
 
 duck1 = sprite(100, 100)
@@ -301,6 +309,19 @@ def render(count):
     global r1
 
     r1.roundEnd()
+
+    r1.curFrame+=1
+    print(r1.curFrame, r1.maxFrame, r1.state)
+
+    if r1.state == 2:
+        if r1.curFrame >= r1.maxFrame:
+            r1.roundStart(1, 5)
+            r1.curFrame = 0
+    
+    if r1.state == 1:
+        if r1.curFrame >= r1.maxFrame:
+            r1.state = 0
+            r1.curFrame = 0
     
     res = pygame.display.Info()
 
@@ -308,6 +329,7 @@ def render(count):
     
     events()
     text = my_font.render("score: " + str(score), False, (0, 0, 0))
+    roundTxt = my_font.render("Round " + str(gm.roundNum), False, (0, 0, 0))
     
     for i in r1.scene:
         if i.alive == True:
@@ -319,11 +341,13 @@ def render(count):
 
     # flip() the display to put your work on screen
     screen.blit(text, (3, 3))
+
+    if r1.state == 1:
+        screen.blit(roundTxt, (500, 500))
+
     temp = (pygame.mouse.get_pos()[0] - cursor.width/2, pygame.mouse.get_pos()[1] - cursor.height/2)
     screen.blit(cursor.image[0][0], temp)
     pygame.display.flip()
-
-    #conta 
 
 # Ralsei é o melhor (não, patos são, QUACKIESSSS :3)
 #imagina ter comentarios >:(
