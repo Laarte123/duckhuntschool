@@ -52,7 +52,6 @@ class Round:
     
     def roundEnd(self):
         global score
-        self.maxFrame = 400
         val = True
         for i in self.scene:
             if i.state == 0:
@@ -61,6 +60,7 @@ class Round:
         if val == True:
             if score > 0:
                 screen.blit(dog.image[0][0], (90, 660))
+            self.maxFrame = 400
             self.state = 2
         
 
