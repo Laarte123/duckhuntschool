@@ -37,13 +37,15 @@ class Round:
         self.patosm = 0
         self.curFrame = 0
     
-    def roundStart(self, dif, ducknum):
+    def roundStart(self, dif, ducknum, gm):
         self.curFrame = 0
         self.maxFrame = 180
         self.state = 1
         self.dif = dif
         self.scene = []
         self.ducks = ducknum
+
+        gm.roundNum += 1
         
         for i in range(0, self.ducks):
             spawnDuckie(self.scene)
@@ -315,7 +317,7 @@ def render(count):
 
     if r1.state == 2:
         if r1.curFrame >= r1.maxFrame:
-            r1.roundStart(1, 5)
+            r1.roundStart(1, 5, gm)
             r1.curFrame = 0
     
     if r1.state == 1:
@@ -361,7 +363,7 @@ def enemy():
 
         return enemy_list
 
-r1.roundStart(1, 3)
+r1.roundStart(1, 3, gm)
 
 while running:
     # poll for events
