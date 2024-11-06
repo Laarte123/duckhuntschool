@@ -173,6 +173,8 @@ def spawnDuckie(scene):
         val = True
         
         temp.y = screen.get_height() / randint(1, 20)
+        if temp.y > 400:
+            temp.y = 500
 
         for i in scene:
             if abs(temp.y - i.y) < i.height:
@@ -231,6 +233,7 @@ def physicz():
     global res
 
     for i in r1.scene:                
+             
         if i.state == 0:
             if i.id == 2:
                 if i.conta < 50:
@@ -264,7 +267,7 @@ def physicz():
                 if i.conta < 50:
                     if patosm > 0:
                         if i.id == 2:
-                            i.x += randint(10,11)
+                            i.x += randint(8,10)
                         i.x += randint(3, 4)
                         a = randint(1,2)
                         if a == 1:
@@ -301,6 +304,76 @@ def physicz():
         if i.x >= res.current_w:
             i.changeState(2)
 
+    #     if i.state == 0:
+    #         if i.conta < 50:
+    #             if patosm > 0:
+    #                 if i.id == 2:
+    #                     i.x += randint(10,11)
+    #                 else:
+    #                     i.x += randint(3, 4)
+    #                 a = randint(1,2)
+    #                 if a == 1:
+    #                     i.y -= randint (2, 3)
+    #                 else:
+    #                     i.y += randint (2, 3)
+    #                 patosm = patosm +1
+    #             if patosm == 40:
+    #                 patosm = 0
+    #             i.x += 2
+    #             i.y += 1
+    #         else:
+    #             if patosm > 0:
+    #                 i.x += randint(3, 4)
+    #                 a = randint(1,2)
+    #                 if a == 1:
+    #                     i.y -= randint (2, 3)
+    #                 if a == 2:
+    #                     i.y += randint (2, 3)
+    #                 patosm = patosm +1
+    #             if patosm == 40:
+    #                 patosm = 0
+    #             i.x += 2
+    #             i.y -= 1
+    #         if i.conta < 50:
+    #             if patosm > 0:
+    #                 if i.id == 2:
+    #                     i.x += randint(10,11)
+    #                 i.x += randint(3, 4)
+    #                 a = randint(1,2)
+    #                 if a == 1:
+    #                     i.y -= randint (2, 3)
+    #                 if a == 2:
+    #                     i.y += randint (2, 3)
+    #                 patosm = patosm +1
+    #             if patosm == 40:
+    #                 patosm = 0
+    #             i.x += 2
+    #         i.y += 1
+    #     else:
+    #         if patosm > 0:
+    #             if i.id == 2:
+    #                 i.x += randint(10, 11)
+    #             i.x += randint(3, 4)
+    #             a = randint(1,2)
+    #             if a == 1:
+    #                 i.y -= randint (2, 3)
+    #             if a == 2:
+    #                 i.y += randint (2, 3)
+    #             patosm = patosm +1
+    #         if patosm == 40:
+    #             patosm = 0
+    #         i.x += 2
+    #         i.y -= 1
+    #     if i.conta == 100:
+    #         #print(i.conta)
+    #         i.conta = 0
+    #     i.conta += 1
+    # else:
+    #     i.y += 6
+        
+    #     if i.x >= res.current_w:
+    #         i.changeState(2)
+
 
 # Render function
 def render(count):
@@ -317,7 +390,7 @@ def render(count):
 
     if r1.state == 2:
         if r1.curFrame >= r1.maxFrame:
-            r1.roundStart(1, 5, gm)
+            r1.roundStart(1, gm.roundNum // 2 + 3, gm)
             r1.curFrame = 0
     
     if r1.state == 1:
