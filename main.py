@@ -80,6 +80,9 @@ class Object:
         self.id = id
         # Agora cada objeto tem estados, só é usado nos patos (W patos skill issue dos outros)
         self.state = 0
+        self.speed = randint(2* self.id, 3* self.id) + 1
+
+        print(self.speed)
 
     def draw(self, background):
         # Isto foi necessario para fazer funcionar, NAO TIRAR (vou tirar)
@@ -176,6 +179,8 @@ def spawnDuckie(scene):
         if temp.y > 400:
             temp.y = 500
 
+        temp.x = randint(-150, -100)
+
         for i in scene:
             if abs(temp.y - i.y) < i.height:
                 val = False
@@ -186,7 +191,7 @@ def spawnDuckie(scene):
              val = True
         
     #temp.y = randint(1, 500)
-    print(temp.y)
+    # print(temp.y)
     scene.append(temp)
 
 #for i in range(0, 1):
@@ -232,147 +237,104 @@ def physicz():
     global patosm
     global res
 
-    for i in r1.scene:                
+    for i in r1.scene:
+
+        if i.y  < 100:
+            i.conta = 51
+        if i.y > 1000:
+            i.y = i.y - 3               
+        
+        if i.conta == 33:
+            i.speed = randint(2, 3)
+        elif i.conta == 66:
+            i.speed = randint(2, 3)
              
         if i.state == 0:
-            if i.id == 2:
-                if i.conta < 50:
-                    if patosm > 0:
-                        if i.id == 2:
-                            i.x += randint(10,11)
-                        i.x += randint(3, 4)
-                        a = randint(1,2)
-                        if a == 1:
-                            i.y -= randint (2, 3)
-                        if a == 2:
-                            i.y += randint (2, 3)
-                        patosm = patosm +1
-                    if patosm == 40:
-                        patosm = 0
-                    i.x += 2
-                    i.y += 1
-                else:
-                    if patosm > 0:
-                        i.x += randint(3, 4)
-                        a = randint(1,2)
-                        if a == 1:
-                            i.y -= randint (2, 3)
-                        if a == 2:
-                            i.y += randint (2, 3)
-                        patosm = patosm +1
-                    if patosm == 40:
-                        patosm = 0
-                    i.x += 2
-                    i.y -= 1
-                if i.conta < 50:
-                    if patosm > 0:
-                        if i.id == 2:
-                            i.x += randint(8,10)
-                        i.x += randint(3, 4)
-                        a = randint(1,2)
-                        if a == 1:
-                            i.y -= randint (2, 3)
-                        if a == 2:
-                            i.y += randint (2, 3)
-                        patosm = patosm +1
-                    if patosm == 40:
-                        patosm = 0
-                    i.x += 2
-                i.y += 1
-            else:
+            a = randint(1,2)
+            # if i.id == 2:
+
+            if i.conta > 50:
                 if patosm > 0:
                     if i.id == 2:
-                        i.x += randint(10, 11)
+                        i.x += randint(10,11)
+                    i.x += randint(3, 4)
+                    if a == 1:
+                        i.y -= randint (2, 3)
+                    else:
+                        i.y += randint (2, 3)
+                        patosm = patosm +1
+                    if patosm == 40:
+                        patosm = 0
+                    
+                if i.id == 2:
+                    i.x += i.speed
+                    i.y += 2
+                else:
+                    i.x += i.speed
+                    i.y += 1
+            else:
+                if patosm > 0:
+                    i.x += randint(3, 4)
+                    if a == 1:
+                        i.y -= randint (2, 3)
+                    else:
+                        i.y += randint (2, 3)
+                        patosm = patosm +1
+                    if patosm >= 40:
+                        patosm = 0
+                if i.id == 2:
+                    i.x += i.speed + 2
+                    i.y -= 2
+                else:
+                    i.x += i.speed
+                    i.y -= 2
+            if i.conta < 50:
+                if patosm > 0:
+                    if i.id == 2:
+                        i.x += randint(8,10)
                     i.x += randint(3, 4)
                     a = randint(1,2)
                     if a == 1:
                         i.y -= randint (2, 3)
-                    if a == 2:
+                    else:
                         i.y += randint (2, 3)
                     patosm = patosm +1
-                if patosm == 40:
+                if patosm >= 40:
                     patosm = 0
-                i.x += 2
-                i.y -= 1
+
+                if i.id == 2:
+                    i.x += i.speed + 2
+                    i.y -= 2
+                else:
+                    i.x += i.speed
+                    i.y -= 2
+            # else:
+            #     if patosm > 0:
+            #         if i.id == 2:
+            #             i.x += randint(10, 11)
+            #         i.x += randint(3, 4)
+            #         a = randint(1,2)
+            #         if a == 1:
+            #             i.y -= randint (2, 3)
+            #         if a == 2:
+            #             i.y += randint (2, 3)
+            #         patosm = patosm +1
+            #     if patosm == 40:
+            #         patosm = 0
+            #     i.x += 2
+            #     i.y -= 1
             if i.conta == 100:
                 #print(i.conta)
                 i.conta = 0
+
+            # if patosm >= 40:
+            #     patosm = 0
             i.conta += 1
         else:
             i.y += 6
         
         if i.x >= res.current_w:
             i.changeState(2)
-
-    #     if i.state == 0:
-    #         if i.conta < 50:
-    #             if patosm > 0:
-    #                 if i.id == 2:
-    #                     i.x += randint(10,11)
-    #                 else:
-    #                     i.x += randint(3, 4)
-    #                 a = randint(1,2)
-    #                 if a == 1:
-    #                     i.y -= randint (2, 3)
-    #                 else:
-    #                     i.y += randint (2, 3)
-    #                 patosm = patosm +1
-    #             if patosm == 40:
-    #                 patosm = 0
-    #             i.x += 2
-    #             i.y += 1
-    #         else:
-    #             if patosm > 0:
-    #                 i.x += randint(3, 4)
-    #                 a = randint(1,2)
-    #                 if a == 1:
-    #                     i.y -= randint (2, 3)
-    #                 if a == 2:
-    #                     i.y += randint (2, 3)
-    #                 patosm = patosm +1
-    #             if patosm == 40:
-    #                 patosm = 0
-    #             i.x += 2
-    #             i.y -= 1
-    #         if i.conta < 50:
-    #             if patosm > 0:
-    #                 if i.id == 2:
-    #                     i.x += randint(10,11)
-    #                 i.x += randint(3, 4)
-    #                 a = randint(1,2)
-    #                 if a == 1:
-    #                     i.y -= randint (2, 3)
-    #                 if a == 2:
-    #                     i.y += randint (2, 3)
-    #                 patosm = patosm +1
-    #             if patosm == 40:
-    #                 patosm = 0
-    #             i.x += 2
-    #         i.y += 1
-    #     else:
-    #         if patosm > 0:
-    #             if i.id == 2:
-    #                 i.x += randint(10, 11)
-    #             i.x += randint(3, 4)
-    #             a = randint(1,2)
-    #             if a == 1:
-    #                 i.y -= randint (2, 3)
-    #             if a == 2:
-    #                 i.y += randint (2, 3)
-    #             patosm = patosm +1
-    #         if patosm == 40:
-    #             patosm = 0
-    #         i.x += 2
-    #         i.y -= 1
-    #     if i.conta == 100:
-    #         #print(i.conta)
-    #         i.conta = 0
-    #     i.conta += 1
-    # else:
-    #     i.y += 6
-        
-    #     if i.x >= res.current_w:
-    #         i.changeState(2)
 
 
 # Render function
@@ -383,10 +345,12 @@ def render(count):
     global patosm
     global r1
 
+    # print(r1.scene[0].conta)
+
     r1.roundEnd()
 
     r1.curFrame+=1
-    print(r1.curFrame, r1.maxFrame, r1.state)
+    # print(r1.curFrame, r1.maxFrame, r1.state)
 
     if r1.state == 2:
         if r1.curFrame >= r1.maxFrame:
