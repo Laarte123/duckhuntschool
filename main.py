@@ -36,6 +36,8 @@ class Round:
         self.state = 0
         self.patosm = 0
         self.curFrame = 0
+        self.dogpos = 800
+        self.rScore = 0
     
     def roundStart(self, dif, ducknum, gm):
         self.curFrame = 0
@@ -44,24 +46,48 @@ class Round:
         self.dif = dif
         self.scene = []
         self.ducks = ducknum
+        self.rScore = 0
+
+        self.dogpos = 800
 
         gm.roundNum += 1
         
         for i in range(0, self.ducks):
             spawnDuckie(self.scene)
     
-    def roundEnd(self):
-        global score
+    def roundCheck(self):
         val = True
         for i in self.scene:
             if i.state == 0:
                 val = False
         
         if val == True:
-            if score > 0:
-                screen.blit(dog.image[0][0], (90, 660))
-            self.maxFrame = 400
-            self.state = 2
+            self.roundEnd()
+    
+    def roundEnd(self):
+        global score
+
+        if self.state != 2:
+            self.curFrame = 0
+        print(self.dogpos, self.curFrame)
+
+        if self.rScore > 0:
+            screen.blit(dog.image[0][0], (90, self.dogpos))
+        else:
+            screen.blit(dog.image[1][0], (90, self.dogpos))
+
+        if self.curFrame <= 100:
+            print("yes")
+            if self.dogpos >= 580:
+                self.dogpos -= 5
+            else:
+                self.dogpos = 579
+        elif self.curFrame >= 300:
+            self.dogpos += 5
+        
+        #print(self.curFrame)
+        self.maxFrame = 400
+        self.state = 2
         
 
 # Define objects
@@ -148,11 +174,16 @@ duck2.load(["d2Hit.png"])
 cursor = sprite(100, 100)
 cursor.load(["cursor.png"])
 
-dog = sprite(100, 100)
+dog = sprite(200, 200)
 dog.load(["dog1.png"])
+dog.load(["dogL1.png", "dogL2.png"])
 
-background = sprite(screen.get_width(), screen.get_width() * 0.6692)
-background.load(["background.png"])
+background1 = sprite(screen.get_width(), screen.get_width() * 0.6692)
+background1.load(["background1.png"])
+
+background2 = sprite(screen.get_width(), screen.get_width() * 0.6692)
+background2.load(["background2.png"])
+
 
 def spawnDuckie(scene):
     val = False
@@ -220,8 +251,10 @@ def checkMouse():
                         # i.alive = False
                         if i.id == 2:
                             score += 2
+                            r1.rScore += 2
                         else:
                             score += 1
+                            r1.rScore += 1
                         #spawnDuckie()
                         b = b +1
                         #if b %2 == 0:
@@ -347,9 +380,6 @@ def render(count):
 
     # print(r1.scene[0].conta)
 
-    r1.roundEnd()
-
-    r1.curFrame+=1
     # print(r1.curFrame, r1.maxFrame, r1.state)
 
     if r1.state == 2:
@@ -369,14 +399,21 @@ def render(count):
     events()
     text = my_font.render("score: " + str(score), False, (0, 0, 0))
     roundTxt = my_font.render("Round " + str(gm.roundNum), False, (0, 0, 0))
+
     
     for i in r1.scene:
         if i.alive == True:
             i.draw(screen)
-    
-    screen.blit(dog.image[0][0], (90, 800))
 
-    screen.blit(background.image[0][0], (0, 0))
+    screen.blit(background2.image[0][0], (0, 0))
+
+    r1.roundCheck()
+
+    r1.curFrame+=1
+    
+    #screen.blit(dog.image[0][0], (90, 800))
+
+    screen.blit(background1.image[0][0], (0, 0))
 
     # flip() the display to put your work on screen
     screen.blit(text, (3, 3))
@@ -401,6 +438,7 @@ def enemy():
         return enemy_list
 
 r1.roundStart(1, 3, gm)
+r1.dogpos = 800
 
 while running:
     # poll for events
