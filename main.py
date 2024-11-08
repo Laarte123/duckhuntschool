@@ -13,6 +13,7 @@ from random import randint, randrange
 score = 0
 patosm = 0
 b = 0
+click = False
 
 # pygame setup
 pygame.init()
@@ -22,7 +23,8 @@ running = True
 pygame.font.init() # you have to call this at the start, 
 pygame.mixer.pre_init()
 pygame.mixer.init()
-my_font = pygame.font.Font('gamefont.ttf', 30)
+my_font = pygame.font.Font('gamefont.ttf', 40)
+titleFont = pygame.font.Font('m29.TTF', 150)
 
 # Sound effects
 win = pygame.mixer.Sound("dogHappy.wav")
@@ -60,56 +62,67 @@ class Round:
 
         self.dogpos = 800
 
-        #gm.roundNum += 1
-
-        #UwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwU
+        # Avançar a subronda e verificar se a ronda acabou
+        self.subrnd += 1
+        if self.subrnd >= 10:
+            gm.roundNum += 1
+            self.subrnd = 0
+            for i in miniDDisplay:
+                i.state = 0
         
-        # for i in range(0, self.ducks):
-        #     spawnDuckie(self.scene)
-
         spawnDuckie(self.scene)
     
-    def roundCheck(self):
+    def roundCheck(self, dog):
         #UwUUwUUwU
         val = True
         for i in self.scene:
             if i.state != 1:
                 val = False
-                print(self.subrnd)
         
         if self.ammo <= 0:
             val = True
         
         if val == True:
-            self.roundEnd()
+            self.roundEnd(dog)
     
-    def roundEnd(self):
+    def roundEnd(self, dog):
         global score
         global win
+        global lose
         global screen
         global miniDDisplay
 
+        # Só é executado no primeiro frame
         if self.state != 2:
             self.curFrame = 0
             if self.rScore != 0:
+                # Jogador acerta o pato
                 win.play()
+                dog.changeState(0)
                 print(self.subrnd)
                 miniDDisplay[self.subrnd].state = 1
+
+                # Colocar a posição do cão
+                if self.scene[-1].x < 295:
+                    dog.x = 295
+                elif self.scene[-1].x > 720:
+                    dog.x = 720
+                else:
+                    dog.x = self.scene[-1].x
+
+            # Jogador perde o pato
             else:
+                dog.changeState(1)
                 lose.play()
-            self.subrnd += 1
-            if self.subrnd >= 10:
-                gm.roundNum += 1
-                self.subrnd = 0
-        # print(self.dogpos, self.curFrame)
+                dog.x = screen.get_width() / 2 - dog.width / 2
 
-        if self.rScore > 0:
-            screen.blit(dog.image[0][0], (self.scene[-1].x, self.dogpos))
-        else:
-            screen.blit(dog.image[1][0], (screen.get_width() / 2 - 100, self.dogpos))
 
+        # Atualizar a altura do cão
+        dog.y = self.dogpos
+        dog.draw(screen)
+
+        # Mover o cão para cima por 100 frames e mover para baixo nos ultimos 100 frames
         if self.curFrame <= 100:
-            # print("yes")
             if self.dogpos >= 580:
                 self.dogpos -= 5
             else:
@@ -132,7 +145,7 @@ class Object:
         self.height = height
         self.conta = 0
         self.curFrame = 0
-        self.vel = 0
+        self.cFall = 0
         self.frameTime = frameTime
         self.id = id
         # Agora cada objeto tem estados, só é usado nos patos (W patos skill issue dos outros)
@@ -215,6 +228,8 @@ dog = sprite(200, 200)
 dog.load(["dog1.png"])
 dog.load(["dogL1.png", "dogL2.png"])
 
+dogObj = Object(dog.image, 0, 0, dog.width, dog.height, 10, 0)
+
 miniD = sprite(30, 30)
 miniD.load(["miniD1.png"])
 miniD.load(["miniD2.png"])
@@ -247,11 +262,11 @@ def spawnDuckie(scene):
     elif special == 20:
         temp = Object(duck3.image, 0, 0, duck3.width, duck3.height, 10, 3)
     elif special == 19:
-        temp = Object(duck3.image, 0, 0, duck3.width, duck3.height, 10, 2)
+        temp = Object(S.image, 0, 0, S.width, S.height, 10, 2)
     elif special == 18:
-        temp = Object(duck3.image, 0, 0, duck3.width, duck3.height, 10, 2)
+        temp = Object(S.image, 0, 0, S.width, S.height, 10, 2)
     elif special == 13:
-        temp = Object(duck2.image, 0, 0, duck2.width, duck2.height, 10, 2)
+        temp = Object(S.image, 0, 0, S.width, S.height, 10, 2)
     else:
         temp = Object(duck1.image, 0, 0, duck1.width, duck1.height, 10, 1)
 
@@ -262,7 +277,7 @@ def spawnDuckie(scene):
         count += 1
         val = True
         
-        temp.y = screen.get_height() / randint(1, 20)
+        temp.y = screen.get_height() / randint(1, 20) + 100
         if temp.y > 400:
             temp.y = 500
 
@@ -298,31 +313,41 @@ def checkMouse():
     global patosm
     global b
     global r1
+    global click
+    global running
     #print(mousePos)
-    for i in r1.scene:
-        if i.id >= 1 and i.id <= 3:
-            # Verificar se o pato está vivo
-            if i.state == 0:
-                # Verificar se o cursor está em cima do pato
-                if mousePos[0] > i.x and mousePos[0] < i.x + i.width:
-                    if mousePos[1] > i.y and mousePos[1] < i.y + i.height:
-                        # Matar o pato
-                        i.changeState(2)
-                        # i.alive = False
-                        if i.id == 2:
-                            score += 2
-                            r1.rScore += 2
-                        if i.id == 1:
-                            score += 1
-                            r1.rScore += 1
-                        if i.id == 3:
-                            score += 3
-                            r1.rScore += 3
-                        #spawnDuckie()
-                        b = b +1
-                        #if b %2 == 0:
-                            #countdown(0)
-                        patosm = patosm + 1
+    if gm.state != 0:
+        for i in r1.scene:
+            if i.id >= 1 and i.id <= 3:
+                # Verificar se o pato está vivo
+                if i.state == 0:
+                    # Verificar se o cursor está em cima do pato
+                    if mousePos[0] > i.x and mousePos[0] < i.x + i.width:
+                        if mousePos[1] > i.y and mousePos[1] < i.y + i.height:
+                            click = True
+                            # Matar o pato
+                            i.changeState(2)
+                            # i.alive = False
+                            if i.id == 2:
+                                score += 2
+                                r1.rScore += 2
+                            if i.id == 1:
+                                score += 1
+                                r1.rScore += 1
+                            if i.id == 3:
+                                score += 3
+                                r1.rScore += 3
+                            #spawnDuckie()
+                            b = b +1
+                            #if b %2 == 0:
+                                #countdown(0)
+                            patosm = patosm + 1
+    else:
+        print(topt3hit.x, topt3hit.y)
+        if topt1hit.collidepoint(mousePos[0], mousePos[1]):
+            gm.state = 1
+        elif topt3hit.collidepoint(mousePos[0], mousePos[1]):
+            running = False
 conta = 0
 
 res = 0
@@ -351,49 +376,83 @@ def physicz():
             # if i.id == 2:
 
             if i.conta > 50:
-                if i.id == 2:
-                    i.x += randint(6,7)
-                i.x += randint(3, 4)
-                if i.id == 3:
-                    i.x += randint(10,11)
-
                 if i.id == 1:
-                    i.y += randint (2, 3)
-                else:
-                    i.y += randint (2, 3)
-                    
-                if i.id == 2:
-                    i.x += i.speed
+                    #i.x += randint(4, 6)
+                    i.x += 6
+                    i.y += randint(2, 3)
+                elif i.id == 2:
+                    #i.x += randint(5, 8)
+                    i.x += 8
                     i.y += 2
-                else:
-                    i.x += i.speed
-                    i.y += 1
-                if i.id == 3:
-                    i.x += i.speed
+                elif i.id == 3:
+                    #i.x += randint(8, 11)
+                    i.x += 11
                     i.y += 3
+
+                # if i.id == 2:
+                #     i.x += randint(6,7)
+                # i.x += randint(3, 4)
+                # if i.id == 3:
+                #     i.x += randint(10,11)
+
+                # if i.id == 1:
+                #     i.y += randint (2, 3)
+                # else:
+                #     i.y += randint (2, 3)
+                    
+                # if i.id == 2:
+                #     i.x += i.speed
+                #     i.y += 2
+                # else:
+                #     i.x += i.speed
+                #     i.y += 1
+                # if i.id == 3:
+                #     i.x += i.speed
+                #     i.y += 3
             else:
-                i.x += randint(3, 4)
-                if a == 1:
-                    i.y -= randint (2, 3)
-                else:
-                    i.y += randint (2, 3)
-                if i.id == 2:
-                    i.x += i.speed + 2
+                if i.id == 1:
+                    i.x += 6
+                    i.y -= randint(2, 3)
+                elif i.id == 2:
+                    i.x += 8
                     i.y -= 2
-                else:
-                    i.x += i.speed
-                    i.y -= 2
-                if i.id == 3:
-                    i.x += i.speed + 4
-                    i.y -= 4
+                elif i.id == 3:
+                    i.x += 11
+                    i.y -= 3
+
+                # i.x += randint(3, 4)
+                # if a == 1:
+                #     i.y -= randint (2, 3)
+                # else:
+                #     i.y += randint (2, 3)
+
+                # if i.id == 2:
+                #     i.x += i.speed + 2
+                #     i.y -= 2
+                # else:
+                #     i.x += i.speed
+                #     i.y -= 2
+                # if i.id == 3:
+                #     i.x += i.speed + 4
+                #     i.y -= 4
+
             if i.conta == 100:
-                #print(i.conta)
                 i.conta = 0
 
             # if patosm >= 40:
             #     patosm = 0
         elif i.state == 1:
             i.y += 9
+            i.cFall += 1
+            # Tirar para funi
+            if i.conta % 5 == 0:
+                i.image[1][0] = pygame.transform.flip(i.image[1][0], True, False)
+                if i.cFall % 2 == 0:
+                    i.x += 5
+                    print("up", i.cFall, sep='\t')
+                else:
+                    print("down", i.cFall, sep='\t')
+                    i.x -= 5
         elif i.state == 2:
             if i.conta >= 20:
                 i.changeState(1)
@@ -406,64 +465,104 @@ def physicz():
 
 # Render function
 def render(count):
-    screen.fill((0, 150, 255))
-
     global res
     global patosm
     global r1
+    global dogObj
+    global click
+    global gm
 
-    # print(r1.scene[0].conta)
+    if gm.state != 0:
+        pygame.mouse.set_visible(False)
+        if click == False:
 
-    # print(r1.curFrame, r1.maxFrame, r1.state)
+            screen.fill((0, 150, 255))
 
-    if r1.state == 2:
-        if r1.curFrame >= r1.maxFrame:
-            r1.roundStart(1, gm.roundNum // 3 + 1, gm)
-            r1.curFrame = 0
+
+            # print(r1.scene[0].conta)
+
+            # print(r1.curFrame, r1.maxFrame, r1.state)
+
+            if r1.state == 2:
+                if r1.curFrame >= r1.maxFrame:
+                    r1.roundStart(1, gm.roundNum // 3 + 1, gm)
+                    r1.curFrame = 0
+            
+            if r1.state == 1:
+                if r1.curFrame >= r1.maxFrame:
+                    r1.state = 0
+                    r1.curFrame = 0
+            
+            res = pygame.display.Info()
+
+            physicz()
+            
+            events()
+            text = my_font.render("score: " + str(score), False, (128, 208, 16))
+            roundTxt = my_font.render(str(gm.roundNum), False, (128, 208, 16))
+            scoreTxt = my_font.render(str(score), False, (255, 255, 255))
+
+            
+            for i in r1.scene:
+                if i.alive == True:
+                    i.draw(screen)
+
+
+            #screen.blit(background2.image[0][0], (0, 0))
+
+            r1.roundCheck(dogObj)
+
+            r1.curFrame+=1
+            
+            #screen.blit(dog.image[0][0], (90, 800))
+
+            screen.blit(background1.image[0][0], (0, 0))
+
+            # score text
+            screen.blit(scoreTxt, (192 * 5, 200 * 5))
+
+            screen.blit(roundTxt, (41 * 5, 183 * 5))
+
+            x = 450
+            ctemp = 1
+            for i in miniDDisplay:
+                screen.blit(i.image[i.state][0], (x + ctemp * 30, 1005))
+                ctemp+=1.3
+
+            temp = (pygame.mouse.get_pos()[0] - cursor.width/2, pygame.mouse.get_pos()[1] - cursor.height/2)
+            screen.blit(cursor.image[0][0], temp)
+        
+        else:
+            click = False
+            screen.fill((0, 0, 0))
+            for i in r1.scene:
+                rtemp = pygame.Rect(i.x, i.y, i.width, i.height)
+                pygame.draw.rect(screen, (255, 255, 255), rtemp)
     
-    if r1.state == 1:
-        if r1.curFrame >= r1.maxFrame:
-            r1.state = 0
-            r1.curFrame = 0
-    
-    res = pygame.display.Info()
+    else:
+        pygame.mouse.set_visible(True)
+        events()
+        screen.fill((0, 0, 0))
+        tline = pygame.Rect(160, 320, 980, 10)
+        global topt1hit
+        global topt2hit
+        global topt3hit
+        topt1hit = pygame.Rect(320, 640, 400, 35)
+        topt2hit = pygame.Rect(320, 720, 400, 35)
+        topt3hit = pygame.Rect(320, 800, 400, 35)
 
-    physicz()
-    
-    events()
-    text = my_font.render("score: " + str(score), False, (128, 208, 16))
-    roundTxt = my_font.render(str(gm.roundNum), False, (128, 208, 16))
-    scoreTxt = my_font.render(str(score), False, (255, 255, 255))
+        title = titleFont.render("Duck", False, (0, 235, 222))
+        title2 = titleFont.render("Hunt", False, (0, 235, 222))
+        topt1 = my_font.render("Start game", False, (255, 174, 10))
+        topt2 = my_font.render("Settings", False, (255, 174, 10))
+        topt3 = my_font.render("Quit", False, (255, 174, 10))
 
-    
-    for i in r1.scene:
-        if i.alive == True:
-            i.draw(screen)
-
-
-    #screen.blit(background2.image[0][0], (0, 0))
-
-    r1.roundCheck()
-
-    r1.curFrame+=1
-    
-    #screen.blit(dog.image[0][0], (90, 800))
-
-    screen.blit(background1.image[0][0], (0, 0))
-
-    # score text
-    screen.blit(scoreTxt, (192 * 5, 200 * 5))
-
-    screen.blit(roundTxt, (41 * 5, 184 * 5))
-
-    x = 450
-    ctemp = 1
-    for i in miniDDisplay:
-        screen.blit(i.image[i.state][0], (x + ctemp * 30, 1005))
-        ctemp+=1.3
-
-    temp = (pygame.mouse.get_pos()[0] - cursor.width/2, pygame.mouse.get_pos()[1] - cursor.height/2)
-    screen.blit(cursor.image[0][0], temp)
+        pygame.draw.rect(screen, (255, 174, 10), tline)
+        screen.blit(title, (160, 80))
+        screen.blit(title2, (360, 360))
+        screen.blit(topt1, (320, 640))
+        screen.blit(topt2, (320, 720))
+        screen.blit(topt3, (320, 800))
 
     pygame.display.flip()
 
