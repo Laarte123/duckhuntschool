@@ -32,7 +32,7 @@ shoot = pygame.mixer.Sound("gunShot.wav")
 class Game:
     def __init__(self):
         self.state = 0
-        self.roundNum = 1
+        self.roundNum = 0
         self.roundDiff = 1
 
 # Definir o jogo como uma classe
@@ -45,8 +45,6 @@ class Round:
         self.curFrame = 0
         self.dogpos = 800
         self.rScore = 0
-        self.ammo = 3
-        self.subrnd = 0
     
     def roundStart(self, dif, ducknum, gm):
         self.curFrame = 0
@@ -56,11 +54,10 @@ class Round:
         self.scene = []
         self.ducks = ducknum
         self.rScore = 0
-        self.ammo = 3
 
         self.dogpos = 800
 
-        #gm.roundNum += 1
+        gm.roundNum += 1
 
         #UwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwU
         
@@ -73,12 +70,8 @@ class Round:
         #UwUUwUUwU
         val = True
         for i in self.scene:
-            if i.state != 1:
+            if i.state == 0:
                 val = False
-                print(self.subrnd)
-        
-        if self.ammo <= 0:
-            val = True
         
         if val == True:
             self.roundEnd()
@@ -86,30 +79,22 @@ class Round:
     def roundEnd(self):
         global score
         global win
-        global screen
-        global miniDDisplay
 
         if self.state != 2:
             self.curFrame = 0
             if self.rScore != 0:
                 win.play()
-                print(self.subrnd)
-                miniDDisplay[self.subrnd].state = 1
             else:
                 lose.play()
-            self.subrnd += 1
-            if self.subrnd >= 10:
-                gm.roundNum += 1
-                self.subrnd = 0
-        # print(self.dogpos, self.curFrame)
+        print(self.dogpos, self.curFrame)
 
         if self.rScore > 0:
             screen.blit(dog.image[0][0], (self.scene[-1].x, self.dogpos))
         else:
-            screen.blit(dog.image[1][0], (screen.get_width() / 2 - 100, self.dogpos))
+            screen.blit(dog.image[1][0], (90, self.dogpos))
 
         if self.curFrame <= 100:
-            # print("yes")
+            print("yes")
             if self.dogpos >= 580:
                 self.dogpos -= 5
             else:
@@ -156,7 +141,7 @@ class Object:
 
     def changeState(self, state):
         self.state = state
-        self.conta = 0
+
 
 def countdown(t): 
     t = 1
@@ -191,22 +176,16 @@ r1 = Round()
 duck1 = sprite(100, 100)
 duck1.load(["d11.png", "d12.png", "d13.png"])
 duck1.load(["d1Hit.png"])
-duck1.load(["d1s.png"])
+duck1.load(["d1Hit.png"])
 
 duck2 = sprite(100, 100)
 duck2.load(["d21.png", "d22.png", "d23.png"])
 duck2.load(["d2Hit.png"])
-duck2.load(["d2s.png"])
+duck2.load(["d2Hit.png"])
 
 duck3 = sprite(100, 100)
 duck3.load(["d31.png", "d32.png", "d33.png"])
 duck3.load(["d3Hit.png"])
-duck3.load(["d3s.png"])
-
-S = sprite(100, 100)
-S.load(["spam1.png", "spam2.png"])
-S.load(["spam1.png", "spam2.png"])
-S.load(["spam1.png", "spam2.png"])
 
 cursor = sprite(100, 100)
 cursor.load(["cursor.png"])
@@ -214,17 +193,6 @@ cursor.load(["cursor.png"])
 dog = sprite(200, 200)
 dog.load(["dog1.png"])
 dog.load(["dogL1.png", "dogL2.png"])
-
-miniD = sprite(30, 30)
-miniD.load(["miniD1.png"])
-miniD.load(["miniD2.png"])
-
-
-miniDDisplay = []
-
-for i in range(0, 10):
-    miniObj = Object(miniD.image, 0, 0, miniD.width, miniD.height, 10, 0)
-    miniDDisplay.append(miniObj)
 
 background1 = sprite(screen.get_width(), screen.get_height())
 background1.load(["back1.png"])
@@ -243,9 +211,9 @@ def spawnDuckie(scene):
     if special == 15:
         temp = Object(duck2.image, 0, 0, duck2.width, duck2.height, 10, 2)
     elif special == 14:
-        temp = Object(S.image, 0, 0, S.width, S.height, 10, 2)
+        temp = Object(duck2.image, 0, 0, duck2.width, duck2.height, 10, 2)
     elif special == 20:
-        temp = Object(duck3.image, 0, 0, duck3.width, duck3.height, 10, 3)
+        temp = Object(duck3.image, 0, 0, duck3.width, duck3.height, 10, 2)
     elif special == 19:
         temp = Object(duck3.image, 0, 0, duck3.width, duck3.height, 10, 2)
     elif special == 18:
@@ -307,7 +275,7 @@ def checkMouse():
                 if mousePos[0] > i.x and mousePos[0] < i.x + i.width:
                     if mousePos[1] > i.y and mousePos[1] < i.y + i.height:
                         # Matar o pato
-                        i.changeState(2)
+                        i.changeState(1)
                         # i.alive = False
                         if i.id == 2:
                             score += 2
@@ -331,15 +299,15 @@ res = 0
 def physicz():
     #UwU
     global r1
+    global patosm
     global res
 
     for i in r1.scene:
 #UwU
         if i.y  < 100:
             i.conta = 51
-        if i.y > 600:
+        if i.y > 1000:
             i.y = i.y - 3               
-        print(i.conta, i.y)
         
         if i.conta == 33:
             i.speed = randint(2, 3)
@@ -351,16 +319,19 @@ def physicz():
             # if i.id == 2:
 
             if i.conta > 50:
-                if i.id == 2:
-                    i.x += randint(6,7)
-                i.x += randint(3, 4)
-                if i.id == 3:
-                    i.x += randint(10,11)
-
-                if i.id == 1:
-                    i.y += randint (2, 3)
-                else:
-                    i.y += randint (2, 3)
+                if patosm > 0:
+                    if i.id == 2:
+                        i.x += randint(10,11)
+                    i.x += randint(3, 4)
+                    if i.id == 3:
+                         i.x += randint(16,17)
+                    if i.id == 1:
+                        i.y -= randint (2, 3)
+                    else:
+                        i.y += randint (2, 3)
+                        patosm = patosm +1
+                    if patosm == 40:
+                        patosm = 0
                     
                 if i.id == 2:
                     i.x += i.speed
@@ -372,11 +343,15 @@ def physicz():
                     i.x += i.speed
                     i.y += 3
             else:
-                i.x += randint(3, 4)
-                if a == 1:
-                    i.y -= randint (2, 3)
-                else:
-                    i.y += randint (2, 3)
+                if patosm > 0:
+                    i.x += randint(3, 4)
+                    if a == 1:
+                        i.y -= randint (2, 3)
+                    else:
+                        i.y += randint (2, 3)
+                        patosm = patosm +1
+                    if patosm >= 40:
+                        patosm = 0
                 if i.id == 2:
                     i.x += i.speed + 2
                     i.y -= 2
@@ -386,22 +361,53 @@ def physicz():
                 if i.id == 3:
                     i.x += i.speed + 4
                     i.y -= 4
+            if i.conta < 50:
+                if patosm > 0:
+                    if i.id == 2:
+                        i.x += randint(8,10)
+                    i.x += randint(3, 4)
+                    a = randint(1,2)
+                    if a == 1:
+                        i.y -= randint (2, 3)
+                    else:
+                        i.y += randint (2, 3)
+
+                if i.id == 2:
+                    i.x += i.speed + 2
+                    i.y -= 2
+                else:
+                    i.x += i.speed
+                    i.y -= 2
+                if i.id == 3:
+                    i.x += i.speed + 4
+                    i.y -= 4
+            # else:
+            #     if patosm > 0:
+            #         if i.id == 2:
+            #             i.x += randint(10, 11)
+            #         i.x += randint(3, 4)
+            #         a = randint(1,2)
+            #         if a == 1:
+            #             i.y -= randint (2, 3)
+            #         if a == 2:
+            #             i.y += randint (2, 3)
+            #         patosm = patosm +1
+            #     if patosm == 40:
+            #         patosm = 0
+            #     i.x += 2
+            #     i.y -= 1
             if i.conta == 100:
                 #print(i.conta)
                 i.conta = 0
 
             # if patosm >= 40:
             #     patosm = 0
-        elif i.state == 1:
-            i.y += 9
-        elif i.state == 2:
-            if i.conta >= 20:
-                i.changeState(1)
-        i.conta += 1
-        
+            i.conta += 1
+        else:
+            i.y += 6
         
         if i.x >= res.current_w:
-            i.changeState(1)
+            i.changeState(2)
 
 
 # Render function
@@ -440,7 +446,6 @@ def render(count):
         if i.alive == True:
             i.draw(screen)
 
-
     #screen.blit(background2.image[0][0], (0, 0))
 
     r1.roundCheck()
@@ -456,15 +461,8 @@ def render(count):
 
     screen.blit(roundTxt, (41 * 5, 184 * 5))
 
-    x = 450
-    ctemp = 1
-    for i in miniDDisplay:
-        screen.blit(i.image[i.state][0], (x + ctemp * 30, 1005))
-        ctemp+=1.3
-
     temp = (pygame.mouse.get_pos()[0] - cursor.width/2, pygame.mouse.get_pos()[1] - cursor.height/2)
     screen.blit(cursor.image[0][0], temp)
-
     pygame.display.flip()
 
 # Ralsei é o melhor (não, patos são, QUACKIESSSS :3)
