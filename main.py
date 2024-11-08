@@ -58,11 +58,16 @@ class Round:
         self.dogpos = 800
 
         gm.roundNum += 1
+
+        #UwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwUUwU
         
-        for i in range(0, self.ducks):
-            spawnDuckie(self.scene)
+        # for i in range(0, self.ducks):
+        #     spawnDuckie(self.scene)
+
+        spawnDuckie(self.scene)
     
     def roundCheck(self):
+        #UwUUwUUwU
         val = True
         for i in self.scene:
             if i.state == 0:
@@ -178,9 +183,9 @@ duck2.load(["d21.png", "d22.png", "d23.png"])
 duck2.load(["d2Hit.png"])
 duck2.load(["d2Hit.png"])
 
-#duck3 = sprite(100, 100)
-#duck3.load(["d31.png", "d32.png", "d33.png"])
-#duck3.load(["d3Hit.png"])
+duck3 = sprite(100, 100)
+duck3.load(["d31.png", "d32.png", "d33.png"])
+duck3.load(["d3Hit.png"])
 
 cursor = sprite(100, 100)
 cursor.load(["cursor.png"])
@@ -201,17 +206,25 @@ def spawnDuckie(scene):
 
     count = 0
     
-    special = randint(1, 15)
+    special = randint(1, 20)
     
     if special == 15:
         temp = Object(duck2.image, 0, 0, duck2.width, duck2.height, 10, 2)
     elif special == 14:
         temp = Object(duck2.image, 0, 0, duck2.width, duck2.height, 10, 2)
+    elif special == 20:
+        temp = Object(duck3.image, 0, 0, duck3.width, duck3.height, 10, 2)
+    elif special == 19:
+        temp = Object(duck3.image, 0, 0, duck3.width, duck3.height, 10, 2)
+    elif special == 18:
+        temp = Object(duck3.image, 0, 0, duck3.width, duck3.height, 10, 2)
     elif special == 13:
         temp = Object(duck2.image, 0, 0, duck2.width, duck2.height, 10, 2)
     else:
         temp = Object(duck1.image, 0, 0, duck1.width, duck1.height, 10, 1)
+
     
+#UwU
 
     while val == False:
         count += 1
@@ -232,33 +245,20 @@ def spawnDuckie(scene):
         if count >= 50:
              val = True
         
-    #temp.y = randint(1, 500)
-    # print(temp.y)
     scene.append(temp)
-
-#for i in range(0, 1):
-    #spawnDuckie(scene)
 
 def events():
     global running
     eventList = pygame.event.get()
-    print(pygame.MOUSEBUTTONDOWN)
 
-    # poll for events
-    # pygame.QUIT event means the user clicked X to close your window
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-
+    # Verificar eventos
     for i in eventList:
-        print(i)
+        #print(i)
         if i.type == pygame.MOUSEBUTTONDOWN:
             shoot.play()
             checkMouse()
         if i.type == pygame.QUIT:
             running = False
-
-    #if pygame.mouse.get_pressed()[0] == True:
 
 def checkMouse():
     mousePos = pygame.mouse.get_pos()
@@ -280,9 +280,12 @@ def checkMouse():
                         if i.id == 2:
                             score += 2
                             r1.rScore += 2
-                        else:
+                        if i.id == 1:
                             score += 1
                             r1.rScore += 1
+                        if i.id == 3:
+                            score += 3
+                            r1.rScore += 3
                         #spawnDuckie()
                         b = b +1
                         #if b %2 == 0:
@@ -294,12 +297,13 @@ res = 0
 
 # Função para as fisicas
 def physicz():
+    #UwU
     global r1
     global patosm
     global res
 
     for i in r1.scene:
-
+#UwU
         if i.y  < 100:
             i.conta = 51
         if i.y > 1000:
@@ -319,7 +323,9 @@ def physicz():
                     if i.id == 2:
                         i.x += randint(10,11)
                     i.x += randint(3, 4)
-                    if a == 1:
+                    if i.id == 3:
+                         i.x += randint(16,17)
+                    if i.id == 1:
                         i.y -= randint (2, 3)
                     else:
                         i.y += randint (2, 3)
@@ -333,6 +339,9 @@ def physicz():
                 else:
                     i.x += i.speed
                     i.y += 1
+                if i.id == 3:
+                    i.x += i.speed
+                    i.y += 3
             else:
                 if patosm > 0:
                     i.x += randint(3, 4)
@@ -349,6 +358,9 @@ def physicz():
                 else:
                     i.x += i.speed
                     i.y -= 2
+                if i.id == 3:
+                    i.x += i.speed + 4
+                    i.y -= 4
             if i.conta < 50:
                 if patosm > 0:
                     if i.id == 2:
@@ -369,6 +381,9 @@ def physicz():
                 else:
                     i.x += i.speed
                     i.y -= 2
+                if i.id == 3:
+                    i.x += i.speed + 4
+                    i.y -= 4
             # else:
             #     if patosm > 0:
             #         if i.id == 2:
@@ -425,8 +440,9 @@ def render(count):
     physicz()
     
     events()
-    text = my_font.render("score: " + str(score), False, (255, 255, 255))
-    roundTxt = my_font.render("Round " + str(gm.roundNum), False, (255, 255, 255))
+    text = my_font.render("score: " + str(score), False, (128, 208, 16))
+    roundTxt = my_font.render(str(gm.roundNum), False, (128, 208, 16))
+    scoreTxt = my_font.render(str(score), False, (255, 255, 255))
 
     
     for i in r1.scene:
@@ -444,10 +460,9 @@ def render(count):
     screen.blit(background1.image[0][0], (0, 0))
 
     # score text
-    screen.blit(text, (3, 3))
+    screen.blit(scoreTxt, (192 * 5, 200 * 5))
 
-    if r1.state == 1:
-        screen.blit(roundTxt, (500, 500))
+    screen.blit(roundTxt, (41 * 5, 184 * 5))
 
     temp = (pygame.mouse.get_pos()[0] - cursor.width/2, pygame.mouse.get_pos()[1] - cursor.height/2)
     screen.blit(cursor.image[0][0], temp)
