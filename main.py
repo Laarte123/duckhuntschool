@@ -16,11 +16,18 @@ b = 0
 
 # pygame setup
 pygame.init()
-screen = pygame.display.set_mode((1542, 1032))
+screen = pygame.display.set_mode((1280, 1120))
 clock = pygame.time.Clock()
 running = True
 pygame.font.init() # you have to call this at the start, 
-my_font = pygame.font.SysFont('Comic Sans MS', 30)
+pygame.mixer.pre_init()
+pygame.mixer.init()
+my_font = pygame.font.Font('gamefont.ttf', 30)
+
+# Sound effects
+win = pygame.mixer.Sound("dogHappy.wav")
+lose = pygame.mixer.Sound("dogL.wav")
+shoot = pygame.mixer.Sound("gunShot.wav")
 
 class Game:
     def __init__(self):
@@ -66,13 +73,18 @@ class Round:
     
     def roundEnd(self):
         global score
+        global win
 
         if self.state != 2:
             self.curFrame = 0
+            if self.rScore != 0:
+                win.play()
+            else:
+                lose.play()
         print(self.dogpos, self.curFrame)
 
         if self.rScore > 0:
-            screen.blit(dog.image[0][0], (90, self.dogpos))
+            screen.blit(dog.image[0][0], (self.scene[-1].x, self.dogpos))
         else:
             screen.blit(dog.image[1][0], (90, self.dogpos))
 
@@ -82,14 +94,13 @@ class Round:
                 self.dogpos -= 5
             else:
                 self.dogpos = 579
-        elif self.curFrame >= 300:
+        elif self.curFrame >= 100:
             self.dogpos += 5
         
         #print(self.curFrame)
-        self.maxFrame = 400
+        self.maxFrame = 200
         self.state = 2
         
-
 # Define objects
 class Object:
     def __init__(self, image, x, y, width, height, frameTime, id):
@@ -178,8 +189,8 @@ dog = sprite(200, 200)
 dog.load(["dog1.png"])
 dog.load(["dogL1.png", "dogL2.png"])
 
-background1 = sprite(screen.get_width(), screen.get_width() * 0.6692)
-background1.load(["background1.png"])
+background1 = sprite(screen.get_width(), screen.get_height())
+background1.load(["back1.png"])
 
 background2 = sprite(screen.get_width(), screen.get_width() * 0.6692)
 background2.load(["background2.png"])
@@ -229,8 +240,25 @@ def spawnDuckie(scene):
     #spawnDuckie(scene)
 
 def events():
-    if pygame.mouse.get_pressed()[0] == True:
-        checkMouse()
+    global running
+    eventList = pygame.event.get()
+    print(pygame.MOUSEBUTTONDOWN)
+
+    # poll for events
+    # pygame.QUIT event means the user clicked X to close your window
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    for i in eventList:
+        print(i)
+        if i.type == pygame.MOUSEBUTTONDOWN:
+            shoot.play()
+            checkMouse()
+        if i.type == pygame.QUIT:
+            running = False
+
+    #if pygame.mouse.get_pressed()[0] == True:
 
 def checkMouse():
     mousePos = pygame.mouse.get_pos()
@@ -384,7 +412,7 @@ def render(count):
 
     if r1.state == 2:
         if r1.curFrame >= r1.maxFrame:
-            r1.roundStart(1, gm.roundNum // 2 + 3, gm)
+            r1.roundStart(1, gm.roundNum // 3 + 1, gm)
             r1.curFrame = 0
     
     if r1.state == 1:
@@ -397,15 +425,15 @@ def render(count):
     physicz()
     
     events()
-    text = my_font.render("score: " + str(score), False, (0, 0, 0))
-    roundTxt = my_font.render("Round " + str(gm.roundNum), False, (0, 0, 0))
+    text = my_font.render("score: " + str(score), False, (255, 255, 255))
+    roundTxt = my_font.render("Round " + str(gm.roundNum), False, (255, 255, 255))
 
     
     for i in r1.scene:
         if i.alive == True:
             i.draw(screen)
 
-    screen.blit(background2.image[0][0], (0, 0))
+    #screen.blit(background2.image[0][0], (0, 0))
 
     r1.roundCheck()
 
@@ -415,7 +443,7 @@ def render(count):
 
     screen.blit(background1.image[0][0], (0, 0))
 
-    # flip() the display to put your work on screen
+    # score text
     screen.blit(text, (3, 3))
 
     if r1.state == 1:
@@ -437,15 +465,11 @@ def enemy():
 
         return enemy_list
 
-r1.roundStart(1, 3, gm)
+r1.roundStart(1, 2, gm)
 r1.dogpos = 800
 
 while running:
-    # poll for events
-    # pygame.QUIT event means the user clicked X to close your window
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+
 
     # fill the screen with a color to wipe away anything from last frame
     render(conta)
