@@ -33,7 +33,7 @@ shoot = pygame.mixer.Sound("gunShot.wav")
 
 class Game:
     def __init__(self):
-        self.state = 0
+        self.state = 1
         self.roundNum = 1
         self.roundDiff = 1
 
@@ -48,7 +48,7 @@ class Round:
         self.dogpos = 800
         self.rScore = 0
         self.ammo = 3
-        self.subrnd = 0
+        self.subrnd = -1
     
     def roundStart(self, dif, ducknum, gm):
         self.curFrame = 0
@@ -66,6 +66,7 @@ class Round:
         self.subrnd += 1
         if self.subrnd >= 10:
             gm.roundNum += 1
+            gm.roundDiff += 0.3
             self.subrnd = 0
             for i in miniDDisplay:
                 i.state = 0
@@ -254,18 +255,18 @@ def spawnDuckie(scene):
     count = 0
     
     special = randint(1, 20)
-    
+
     if special == 15:
         temp = Object(duck2.image, 0, 0, duck2.width, duck2.height, 10, 2)
-    elif special == 14:
-        temp = Object(S.image, 0, 0, S.width, S.height, 10, 2)
-    elif special == 20:
+    elif special == 16:
+        temp = Object(duck3.image, 0, 0, duck3.width, duck3.height, 10, 3)
+    elif special == 17:
+        temp = Object(duck2.image, 0, 0, duck2.width, duck2.height, 10, 2)
+    elif special == 18:
         temp = Object(duck3.image, 0, 0, duck3.width, duck3.height, 10, 3)
     elif special == 19:
-        temp = Object(S.image, 0, 0, S.width, S.height, 10, 2)
-    elif special == 18:
-        temp = Object(S.image, 0, 0, S.width, S.height, 10, 2)
-    elif special == 13:
+        temp = Object(duck2.image, 0, 0, duck2.width, duck2.height, 10, 2)
+    elif special == 20:
         temp = Object(S.image, 0, 0, S.width, S.height, 10, 2)
     else:
         temp = Object(duck1.image, 0, 0, duck1.width, duck1.height, 10, 1)
@@ -302,8 +303,8 @@ def events():
     for i in eventList:
         #print(i)
         if i.type == pygame.MOUSEBUTTONDOWN:
-            shoot.play()
-            checkMouse()
+            if pygame.mouse.get_pressed()[0] == 1:
+                checkMouse()
         if i.type == pygame.QUIT:
             running = False
 
@@ -316,7 +317,8 @@ def checkMouse():
     global click
     global running
     #print(mousePos)
-    if gm.state != 0:
+    if gm.state == 0:
+        shoot.play()
         for i in r1.scene:
             if i.id >= 1 and i.id <= 3:
                 # Verificar se o pato está vivo
@@ -342,13 +344,16 @@ def checkMouse():
                             #if b %2 == 0:
                                 #countdown(0)
                             patosm = patosm + 1
-    else:
-        print(topt3hit.x, topt3hit.y)
+                            break
+    # Menu principal
+    elif gm.state == 1:
+        # Verificar se o jogador clicou em alguma as opções
         if topt1hit.collidepoint(mousePos[0], mousePos[1]):
-            gm.state = 1
+            gm.state = 0
         elif topt3hit.collidepoint(mousePos[0], mousePos[1]):
             running = False
-conta = 0
+    # Definições
+    #elif gm.state == 2:
 
 res = 0
 
@@ -359,13 +364,13 @@ def physicz():
     global res
 
     for i in r1.scene:
-#UwU
+        # Evitar que o pato vá para fora do ecra
         if i.y  < 100:
             i.conta = 51
         if i.y > 600:
-            i.y = i.y - 3               
-        print(i.conta, i.y)
+            i.y = i.y - 3
         
+        # Mudar a velocidade do pato cada 33 frames
         if i.conta == 33:
             i.speed = randint(2, 3)
         elif i.conta == 66:
@@ -373,74 +378,39 @@ def physicz():
              
         if i.state == 0:
             a = randint(1,2)
-            # if i.id == 2:
 
+            # Fazer o pato subir
             if i.conta > 50:
+                # Mover o pato conforme o seu nivel
                 if i.id == 1:
                     #i.x += randint(4, 6)
-                    i.x += 6
+                    i.x += 6 * gm.roundDiff
                     i.y += randint(2, 3)
                 elif i.id == 2:
                     #i.x += randint(5, 8)
-                    i.x += 8
+                    i.x += 8 * gm.roundDiff
                     i.y += 2
                 elif i.id == 3:
                     #i.x += randint(8, 11)
-                    i.x += 11
+                    i.x += 11 * gm.roundDiff
                     i.y += 3
-
-                # if i.id == 2:
-                #     i.x += randint(6,7)
-                # i.x += randint(3, 4)
-                # if i.id == 3:
-                #     i.x += randint(10,11)
-
-                # if i.id == 1:
-                #     i.y += randint (2, 3)
-                # else:
-                #     i.y += randint (2, 3)
-                    
-                # if i.id == 2:
-                #     i.x += i.speed
-                #     i.y += 2
-                # else:
-                #     i.x += i.speed
-                #     i.y += 1
-                # if i.id == 3:
-                #     i.x += i.speed
-                #     i.y += 3
+            # O mesmo mas quando está a descer
             else:
                 if i.id == 1:
-                    i.x += 6
+                    i.x += 6 * gm.roundDiff
                     i.y -= randint(2, 3)
                 elif i.id == 2:
-                    i.x += 8
+                    i.x += 8 * gm.roundDiff
                     i.y -= 2
                 elif i.id == 3:
-                    i.x += 11
+                    i.x += 11 * gm.roundDiff
                     i.y -= 3
 
-                # i.x += randint(3, 4)
-                # if a == 1:
-                #     i.y -= randint (2, 3)
-                # else:
-                #     i.y += randint (2, 3)
-
-                # if i.id == 2:
-                #     i.x += i.speed + 2
-                #     i.y -= 2
-                # else:
-                #     i.x += i.speed
-                #     i.y -= 2
-                # if i.id == 3:
-                #     i.x += i.speed + 4
-                #     i.y -= 4
-
+            # Reniciar o contador cada 100 frames
             if i.conta == 100:
                 i.conta = 0
 
-            # if patosm >= 40:
-            #     patosm = 0
+        # Fazer o pato cair caso ter levado um tiro
         elif i.state == 1:
             i.y += 9
             i.cFall += 1
@@ -449,9 +419,7 @@ def physicz():
                 i.image[1][0] = pygame.transform.flip(i.image[1][0], True, False)
                 if i.cFall % 2 == 0:
                     i.x += 5
-                    print("up", i.cFall, sep='\t')
                 else:
-                    print("down", i.cFall, sep='\t')
                     i.x -= 5
         elif i.state == 2:
             if i.conta >= 20:
@@ -464,7 +432,7 @@ def physicz():
 
 
 # Render function
-def render(count):
+def render():
     global res
     global patosm
     global r1
@@ -472,7 +440,7 @@ def render(count):
     global click
     global gm
 
-    if gm.state != 0:
+    if gm.state == 0:
         pygame.mouse.set_visible(False)
         if click == False:
 
@@ -564,7 +532,12 @@ def render(count):
         screen.blit(topt2, (320, 720))
         screen.blit(topt3, (320, 800))
 
+    fps = clock.get_fps()
+    fpsTxt = my_font.render(str(int(fps)), False, (255, 255, 255))
+    screen.blit(fpsTxt, (0, 0))
     pygame.display.flip()
+    clock.tick(60)
+    #clock.tick()
 
 # Ralsei é o melhor (não, patos são, QUACKIESSSS :3)
 #imagina ter comentarios >:(
@@ -582,13 +555,7 @@ r1.roundStart(1, 2, gm)
 r1.dogpos = 800
 
 while running:
-
-
-    # fill the screen with a color to wipe away anything from last frame
-    render(conta)
-
-
-
-    clock.tick(60)  # limits FPS to 60
+    # Literalmente o jogo inteiro
+    render()
 
 pygame.quit()
