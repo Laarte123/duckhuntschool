@@ -295,6 +295,8 @@ miniD = sprite(30, 30)
 miniD.load(["miniD1.png"])
 miniD.load(["miniD2.png"])
 
+bullet = sprite(30, 30)
+bullet.load(["bullet.png"])
 
 miniDDisplay = []
 
@@ -548,6 +550,12 @@ def render():
             ctemp = 1
             for i in miniDDisplay:
                 screen.blit(i.image[i.state][0], (x + ctemp * 30, 1005))
+                ctemp+=1.3
+            
+            x = 95
+            ctemp = 1
+            for i in range(r1.ammo):
+                screen.blit(bullet.image[0][0], (x + ctemp * 30, 1005))
                 ctemp+=1.3
 
             temp = (pygame.mouse.get_pos()[0] - cursor.width/2, pygame.mouse.get_pos()[1] - cursor.height/2)
