@@ -23,6 +23,10 @@ running = True
 pygame.font.init() # you have to call this at the start, 
 pygame.mixer.pre_init()
 pygame.mixer.init()
+
+screen.set_alpha(None)
+
+# Fonts
 my_font = pygame.font.Font('gamefont.ttf', 40)
 titleFont = pygame.font.Font('m29.TTF', 150)
 
@@ -30,6 +34,7 @@ titleFont = pygame.font.Font('m29.TTF', 150)
 win = pygame.mixer.Sound("dogHappy.wav")
 lose = pygame.mixer.Sound("dogL.wav")
 shoot = pygame.mixer.Sound("gunShot.wav")
+intro = pygame.mixer.Sound("intro.mp3")
 
 class Game:
     def __init__(self):
@@ -42,13 +47,14 @@ class Round:
     def __init__(self):
         self.maxFrame = 10
         self.scene = []
-        self.state = 0
+        self.state = 3
         self.patosm = 0
         self.curFrame = 0
         self.dogpos = 800
         self.rScore = 0
         self.ammo = 3
-        self.subrnd = -1
+        self.subrnd = 9
+        self.doganim = 0
     
     def roundStart(self, dif, ducknum, gm):
         self.curFrame = 0
@@ -68,23 +74,76 @@ class Round:
             gm.roundNum += 1
             gm.roundDiff += 0.3
             self.subrnd = 0
+            self.curFrame = 0
+            self.state = 3
             for i in miniDDisplay:
                 i.state = 0
-        
-        spawnDuckie(self.scene)
+        else:
+            spawnDuckie(self.scene)
+            self.state = 0
     
     def roundCheck(self, dog):
         #UwUUwUUwU
-        val = True
-        for i in self.scene:
-            if i.state != 1:
-                val = False
-        
-        if self.ammo <= 0:
+        if self.state == 0:
             val = True
+            for i in self.scene:
+                if i.state != 1:
+                    val = False
+            
+            if self.ammo <= 0:
+                val = True
+            
+            if val == True:
+                self.roundEnd(dog)
+
+        elif self.state == 3:
+            self.maxFrame = 301
+            dog.changeState(2)
+            if self.curFrame <= 1:
+                intro.play()
+                dog.frameTime = 4
+                dog.x = 110
+                dog.y = 700
+                self.doganim = 0
+            elif self.curFrame <= 64:
+                dog.x += 2
+                self.doganim += 1
+                if self.doganim >= 12:
+                    self.doganim = 0
+            elif self.curFrame >= 65 and self.curFrame < 82:
+                self.doganim += 1
+                if self.doganim >= 20:
+                    self.doganim = 12
+            elif self.curFrame >= 82 and self.curFrame < 134:
+                dog.x += 2
+                self.doganim += 1
+                if self.doganim >= 12:
+                    self.doganim = 0
+            elif self.curFrame >= 134 and self.curFrame < 142:
+                self.doganim = 20
+            elif self.curFrame >= 160 and self.curFrame < 200:
+                self.doganim = 25
+                dog.x += 2
+                dog.y -= 9
+            elif self.curFrame >= 200:
+                self.doganim = 31
+                dog.x += 2
+                dog.y += 9
+            if self.curFrame == 300:
+                spawnDuckie(self.scene)
+                self.state = 0
+            screen.blit(dog.image[2][self.doganim // 4], (dog.x, dog.y))
         
-        if val == True:
-            self.roundEnd(dog)
+
+        if r1.state == 2:
+            if r1.curFrame >= r1.maxFrame:
+                self.roundStart(gm.roundDiff, 1, gm)
+            else:
+                self.roundEnd(dog)
+        
+        self.curFrame += 1
+
+        #print(len(self.scene), self.curFrame, self.doganim)
     
     def roundEnd(self, dog):
         global score
@@ -92,9 +151,11 @@ class Round:
         global lose
         global screen
         global miniDDisplay
+        print("THEE BIT SHOT!! 11!!!!!!1111!!")
 
         # Só é executado no primeiro frame
-        if self.state != 2:
+        if self.state == 0:
+            self.state = 2
             self.curFrame = 0
             if self.rScore != 0:
                 # Jogador acerta o pato
@@ -131,9 +192,7 @@ class Round:
         elif self.curFrame >= 100:
             self.dogpos += 5
         
-        #print(self.curFrame)
         self.maxFrame = 200
-        self.state = 2
         
 # Define objects
 class Object:
@@ -228,6 +287,7 @@ cursor.load(["cursor.png"])
 dog = sprite(200, 200)
 dog.load(["dog1.png"])
 dog.load(["dogL1.png", "dogL2.png"])
+dog.load(["dogCut1.png", "dogCut2.png","dogCut3.png","dogCut4.png","dogCut5.png","dogCut6.png","dogCut7.png","dogCut8.png"])
 
 dogObj = Object(dog.image, 0, 0, dog.width, dog.height, 10, 0)
 
@@ -318,33 +378,35 @@ def checkMouse():
     global running
     #print(mousePos)
     if gm.state == 0:
-        shoot.play()
-        for i in r1.scene:
-            if i.id >= 1 and i.id <= 3:
-                # Verificar se o pato está vivo
-                if i.state == 0:
-                    # Verificar se o cursor está em cima do pato
-                    if mousePos[0] > i.x and mousePos[0] < i.x + i.width:
-                        if mousePos[1] > i.y and mousePos[1] < i.y + i.height:
-                            click = True
-                            # Matar o pato
-                            i.changeState(2)
-                            # i.alive = False
-                            if i.id == 2:
-                                score += 2
-                                r1.rScore += 2
-                            if i.id == 1:
-                                score += 1
-                                r1.rScore += 1
-                            if i.id == 3:
-                                score += 3
-                                r1.rScore += 3
-                            #spawnDuckie()
-                            b = b +1
-                            #if b %2 == 0:
-                                #countdown(0)
-                            patosm = patosm + 1
-                            break
+        if r1.state == 0:
+            shoot.play()
+            r1.ammo -= 1
+            for i in r1.scene:
+                if i.id >= 1 and i.id <= 3:
+                    # Verificar se o pato está vivo
+                    if i.state == 0:
+                        # Verificar se o cursor está em cima do pato
+                        if mousePos[0] > i.x and mousePos[0] < i.x + i.width:
+                            if mousePos[1] > i.y and mousePos[1] < i.y + i.height:
+                                click = True
+                                # Matar o pato
+                                i.changeState(2)
+                                # i.alive = False
+                                if i.id == 2:
+                                    score += 2
+                                    r1.rScore += 2
+                                if i.id == 1:
+                                    score += 1
+                                    r1.rScore += 1
+                                if i.id == 3:
+                                    score += 3
+                                    r1.rScore += 3
+                                #spawnDuckie()
+                                b = b +1
+                                #if b %2 == 0:
+                                    #countdown(0)
+                                patosm = patosm + 1
+                                break
     # Menu principal
     elif gm.state == 1:
         # Verificar se o jogador clicou em alguma as opções
@@ -441,21 +503,12 @@ def render():
     global gm
 
     if gm.state == 0:
+        print(r1.curFrame, r1.state, r1.subrnd)
         pygame.mouse.set_visible(False)
         if click == False:
 
             screen.fill((0, 150, 255))
 
-
-            # print(r1.scene[0].conta)
-
-            # print(r1.curFrame, r1.maxFrame, r1.state)
-
-            if r1.state == 2:
-                if r1.curFrame >= r1.maxFrame:
-                    r1.roundStart(1, gm.roundNum // 3 + 1, gm)
-                    r1.curFrame = 0
-            
             if r1.state == 1:
                 if r1.curFrame >= r1.maxFrame:
                     r1.state = 0
@@ -472,19 +525,19 @@ def render():
 
             
             for i in r1.scene:
-                if i.alive == True:
-                    i.draw(screen)
+                i.draw(screen)
 
-
-            #screen.blit(background2.image[0][0], (0, 0))
+            screen.blit(background1.image[0][0], (0, 0))
 
             r1.roundCheck(dogObj)
 
-            r1.curFrame+=1
+            if r1.state == 3 :
+                if r1.curFrame >= 200:
+                    screen.blit(background1.image[0][0], (0, 0))
             
-            #screen.blit(dog.image[0][0], (90, 800))
+            if r1.state == 2:
+                screen.blit(background1.image[0][0], (0, 0))
 
-            screen.blit(background1.image[0][0], (0, 0))
 
             # score text
             screen.blit(scoreTxt, (192 * 5, 200 * 5))
@@ -551,7 +604,7 @@ def enemy():
 
         return enemy_list
 
-r1.roundStart(1, 2, gm)
+#r1.roundStart(1, 1, gm)
 r1.dogpos = 800
 
 while running:
