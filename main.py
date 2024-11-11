@@ -14,6 +14,10 @@ score = 0
 patosm = 0
 b = 0
 click = False
+health = 100
+
+powers =[0, 0, 0]
+pa = "nada"
 
 # pygame setup
 pygame.init()
@@ -35,6 +39,7 @@ win = pygame.mixer.Sound("dogHappy.wav")
 lose = pygame.mixer.Sound("dogL.wav")
 shoot = pygame.mixer.Sound("gunShot.wav")
 intro = pygame.mixer.Sound("intro.mp3")
+musica = pygame.mixer.music.load("dht.wav")
 
 class Game:
     def __init__(self):
@@ -52,7 +57,10 @@ class Round:
         self.curFrame = 0
         self.dogpos = 800
         self.rScore = 0
-        self.ammo = 3
+        if pa == "ammo":
+            self.ammo = 999999
+        else:
+            self.ammo = 3
         self.subrnd = 9
         self.doganim = 0
     
@@ -151,7 +159,8 @@ class Round:
         global lose
         global screen
         global miniDDisplay
-        print("THEE BIT SHOT!! 11!!!!!!1111!!")
+        global health
+        print("THY BEAST HAS BEEN SLAYED!")
 
         # Só é executado no primeiro frame
         if self.state == 0:
@@ -176,6 +185,7 @@ class Round:
             else:
                 dog.changeState(1)
                 lose.play()
+                health -= 5
                 dog.x = screen.get_width() / 2 - dog.width / 2
 
 
@@ -298,6 +308,15 @@ miniD.load(["miniD2.png"])
 bullet = sprite(30, 30)
 bullet.load(["bullet.png"])
 
+x2 = sprite(50, 50)
+x2.load(["x2.png"])
+
+vida = sprite(50,50)
+vida.load(["jug.png"])
+
+ammo = sprite(50, 50)
+ammo.load (["ammo.png"])
+
 miniDDisplay = []
 
 for i in range(0, 10):
@@ -325,13 +344,13 @@ def spawnDuckie(scene):
     elif special == 17:
         temp = Object(duck2.image, 0, 0, duck2.width, duck2.height, 10, 2)
     elif special == 18:
-        temp = Object(duck3.image, 0, 0, duck3.width, duck3.height, 10, 3)
+        temp = Object(S.image, 0, 0, S.width, S.height, 10, 4)
     elif special == 19:
-        temp = Object(duck2.image, 0, 0, duck2.width, duck2.height, 10, 2)
+        temp = Object(S.image, 0, 0, S.width, S.height, 10, 4)
     elif special == 20:
-        temp = Object(S.image, 0, 0, S.width, S.height, 10, 2)
-    else:
         temp = Object(duck1.image, 0, 0, duck1.width, duck1.height, 10, 1)
+    else:
+        temp = Object(S.image, 0, 0, S.width, S.height, 10, 4)
 
     
 #UwU
@@ -384,7 +403,7 @@ def checkMouse():
             shoot.play()
             r1.ammo -= 1
             for i in r1.scene:
-                if i.id >= 1 and i.id <= 3:
+                if i.id >= 1 and i.id <= 4:
                     # Verificar se o pato está vivo
                     if i.state == 0:
                         # Verificar se o cursor está em cima do pato
@@ -394,26 +413,34 @@ def checkMouse():
                                 # Matar o pato
                                 i.changeState(2)
                                 # i.alive = False
-                                if i.id == 2:
+                                if powers[0]:
+                                    score += i.id * 2
+                                else:
+                                    if i.id == 2:
+                                        score += 2
+                                        r1.rScore += 2
+                                    if i.id == 1:
+                                        score += 1
+                                        r1.rScore += 1
+                                    if i.id == 3:
+                                        score += 3
+                                        r1.rScore += 3
+                                b = b +1
+                                patosm = patosm + 1
+                                if i.id == 4:
+                                    j = randint(0,2)
                                     score += 2
                                     r1.rScore += 2
-                                if i.id == 1:
-                                    score += 1
-                                    r1.rScore += 1
-                                if i.id == 3:
-                                    score += 3
-                                    r1.rScore += 3
-                                #spawnDuckie()
-                                b = b +1
-                                #if b %2 == 0:
-                                    #countdown(0)
-                                patosm = patosm + 1
+                                    powers[j] = True
                                 break
     # Menu principal
     elif gm.state == 1:
         # Verificar se o jogador clicou em alguma as opções
         if topt1hit.collidepoint(mousePos[0], mousePos[1]):
             gm.state = 0
+        elif topt2hit.collidepoint(mousePos[0], mousePos[1]):
+            gm.state = 2
+            pygame.mixer.music.stop()
         elif topt3hit.collidepoint(mousePos[0], mousePos[1]):
             running = False
     # Definições
@@ -458,6 +485,9 @@ def physicz():
                     #i.x += randint(8, 11)
                     i.x += 11 * gm.roundDiff
                     i.y += 3
+                elif i.id == 4:
+                    i.x += 8 * gm.roundDiff
+                    i.y += 2
             # O mesmo mas quando está a descer
             else:
                 if i.id == 1:
@@ -469,6 +499,9 @@ def physicz():
                 elif i.id == 3:
                     i.x += 11 * gm.roundDiff
                     i.y -= 3
+                elif i.id == 4:
+                    i.x += 8 * gm.roundDiff
+                    i.y -= 2
 
             # Reniciar o contador cada 100 frames
             if i.conta == 100:
@@ -540,6 +573,22 @@ def render():
             if r1.state == 2:
                 screen.blit(background1.image[0][0], (0, 0))
 
+            t = 0
+            for j in powers:
+                global pa
+                if j == True:
+                    if t == 0:
+                        screen.blit(x2.image[0][0], (1000, 100))
+                        pa = "x2"
+                    elif t == 1:
+                        screen.blit(vida.image[0][0], (1000, 150))
+                        pa = "vida"
+                    elif t == 2:
+                        screen.blit(ammo.image[0][0], (1000, 200))
+                        pa = "ammo"
+                t+=1
+            hrec = pygame.rect.Rect(480, 1050, 235, 10)
+            pygame.draw.rect(screen, (0, 0, 255), hrect)
 
             # score text
             screen.blit(scoreTxt, (192 * 5, 200 * 5))
@@ -568,7 +617,9 @@ def render():
                 rtemp = pygame.Rect(i.x, i.y, i.width, i.height)
                 pygame.draw.rect(screen, (255, 255, 255), rtemp)
     
-    else:
+    elif gm.state == 1:
+        if not pygame.mixer.music.get_busy():
+            pygame.mixer.music.play()
         pygame.mouse.set_visible(True)
         events()
         screen.fill((0, 0, 0))
@@ -592,6 +643,8 @@ def render():
         screen.blit(topt1, (320, 640))
         screen.blit(topt2, (320, 720))
         screen.blit(topt3, (320, 800))
+    
+    #elif gm.state == 3:
 
     fps = clock.get_fps()
     fpsTxt = my_font.render(str(int(fps)), False, (255, 255, 255))
@@ -602,16 +655,6 @@ def render():
 
 # Ralsei é o melhor (não, patos são, QUACKIESSSS :3)
 #imagina ter comentarios >:(
-def enemy():
-    enemy_list = []
-
-    for e in range(0, 200):
-        x_cor = random.randint(25, 361)
-        e = Object("enemy.png", 70, 70, x_cor, 25)
-        enemy_list.append(e)
-
-        return enemy_list
-
 #r1.roundStart(1, 1, gm)
 r1.dogpos = 800
 
