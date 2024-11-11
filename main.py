@@ -378,6 +378,7 @@ def spawnDuckie(scene):
 
 def events():
     global running
+    global health
     eventList = pygame.event.get()
 
     # Verificar eventos
@@ -386,6 +387,8 @@ def events():
         if i.type == pygame.MOUSEBUTTONDOWN:
             if pygame.mouse.get_pressed()[0] == 1:
                 checkMouse()
+            elif pygame.mouse.get_pressed()[2] == 1:
+                health -= 5
         if i.type == pygame.QUIT:
             running = False
 
@@ -536,6 +539,7 @@ def render():
     global dogObj
     global click
     global gm
+    global health
 
     if gm.state == 0:
         print(r1.curFrame, r1.state, r1.subrnd)
@@ -557,10 +561,16 @@ def render():
             text = my_font.render("score: " + str(score), False, (128, 208, 16))
             roundTxt = my_font.render(str(gm.roundNum), False, (128, 208, 16))
             scoreTxt = my_font.render(str(score), False, (255, 255, 255))
-
+            htxt = my_font.render(str(health), False, (255, 255, 255))
             
             for i in r1.scene:
                 i.draw(screen)
+
+            hrec = pygame.rect.Rect(480, 1050, 200 * (health / 100), 25)
+
+            hr = pygame.rect.Rect(680 - health * 5, 1050, 200 * (health / 100), 25)
+
+            pygame.draw.rect(screen, (255, 255, 255), hr)
 
             screen.blit(background1.image[0][0], (0, 0))
 
@@ -587,13 +597,13 @@ def render():
                         screen.blit(ammo.image[0][0], (1000, 200))
                         pa = "ammo"
                 t+=1
-            hrec = pygame.rect.Rect(480, 1050, 235, 10)
-            pygame.draw.rect(screen, (0, 0, 255), hrect)
 
             # score text
             screen.blit(scoreTxt, (192 * 5, 200 * 5))
 
             screen.blit(roundTxt, (41 * 5, 183 * 5))
+
+            screen.blit(htxt, (100, 1))
 
             x = 450
             ctemp = 1
