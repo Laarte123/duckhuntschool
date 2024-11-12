@@ -186,6 +186,8 @@ class Round:
                 dog.changeState(1)
                 lose.play()
                 health -= 5
+                if health <= 0:
+                    gm.state = 1
                 dog.x = screen.get_width() / 2 - dog.width / 2
 
 
@@ -317,6 +319,13 @@ vida.load(["jug.png"])
 ammo = sprite(50, 50)
 ammo.load (["ammo.png"])
 
+psprite = sprite(50, 50)
+psprite.load(["x2.png"])
+psprite.load(["jug.png"])
+psprite.load(["ammo.png"])
+
+pow = Object(psprite.image, 0, 0, psprite.width, psprite.height, 10, 0)
+
 miniDDisplay = []
 
 for i in range(0, 10):
@@ -441,6 +450,7 @@ def checkMouse():
         # Verificar se o jogador clicou em alguma as opções
         if topt1hit.collidepoint(mousePos[0], mousePos[1]):
             gm.state = 0
+            pygame.mixer.music.stop()
         elif topt2hit.collidepoint(mousePos[0], mousePos[1]):
             gm.state = 2
             pygame.mixer.music.stop()
@@ -588,13 +598,16 @@ def render():
                 global pa
                 if j == True:
                     if t == 0:
-                        screen.blit(x2.image[0][0], (1000, 100))
+                        pow.changestate(0)
+                        pow.draw()
                         pa = "x2"
                     elif t == 1:
-                        screen.blit(vida.image[0][0], (1000, 150))
+                        pow.changestate(1)
+                        pow.draw()
                         pa = "vida"
                     elif t == 2:
-                        screen.blit(ammo.image[0][0], (1000, 200))
+                        pow.changestate(2)
+                        pow.draw()
                         pa = "ammo"
                 t+=1
 
